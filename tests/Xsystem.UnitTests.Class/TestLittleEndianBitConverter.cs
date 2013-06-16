@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace xsystem
 {
     [TestFixture]
-    public class TestLittleEndianBitConverter
+    public class TestLEBitConverter
     {
         [TestFixtureSetUp]
         public void classInit()
@@ -26,46 +26,46 @@ namespace xsystem
         }
 
         [Test]
-        public void testToInt8()
+        public void testFrom2ToInt()
         {
             byte[] value = { 9, 0, 11, 0 };
             int actual, expect;
 
-            actual = LittleEndianBitConverter.ToInt8(value, 0);
+            actual = LEBitConverter.From2ToInt(value, 0);
             expect = 9;
             Assert.AreEqual(actual, expect);
 
-            actual = LittleEndianBitConverter.ToInt8(value, 2);
+            actual = LEBitConverter.From2ToInt(value, 2);
             expect = 11;
             Assert.AreEqual(actual, expect);
         }
 
         [Test]
-        public void testToInt16()
+        public void testFrom4ToInt()
         {
             byte[] value = { 9, 0, 0, 0, 11, 0, 0, 0 };
             int actual, expect;
 
-            actual = LittleEndianBitConverter.ToInt16(value, 0);
+            actual = LEBitConverter.From4ToInt(value, 0);
             expect = 9;
             Assert.AreEqual(actual, expect);
 
-            actual = LittleEndianBitConverter.ToInt16(value, 4);
+            actual = LEBitConverter.From4ToInt(value, 4);
             expect = 11;
             Assert.AreEqual(actual, expect);
         }
 
         [Test]
-        public void testToInt12()
+        public void testFrom3ToInt()
         {
             byte[] value = { 9, 0, 0, 11, 0, 0 };
             int actual, expect;
 
-            actual = LittleEndianBitConverter.ToInt12(value, 0);
+            actual = LEBitConverter.From3ToInt(value, 0);
             expect = 9;
             Assert.AreEqual(actual, expect);
 
-            actual = LittleEndianBitConverter.ToInt12(value, 3);
+            actual = LEBitConverter.From3ToInt(value, 3);
             expect = 11;
             Assert.AreEqual(actual, expect);
         }

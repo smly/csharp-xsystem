@@ -44,11 +44,12 @@ namespace xsystem
             ptr = this.mapPtr[objectNo];
             if (disk < 0 || ptr < 0) return null;
             if (filePtr[disk] == null) return null;
+
             dataPtr = this.filePtr[disk][ptr];
             dataPtr2 = this.filePtr[disk][ptr + 1];
             if (dataPtr == 0 || dataPtr2 == 0) return null;
-            int readSize = dataPtr2 - dataPtr;
 
+            int readSize = dataPtr2 - dataPtr;
             DriObject dri;
             // if not mmapped
             dri.dataRaw = new byte[readSize];
@@ -59,8 +60,10 @@ namespace xsystem
             fileStream.Read(dri.dataRaw, 0, readSize);
             fileStream.Close();
 
-            dri.realDataPtr = LittleEndianBitConverter.ToInt16(dri.dataRaw, 0);
-            dri.size = LittleEndianBitConverter.ToInt16(dri.dataRaw, 0);
+            // 先頭32バイト以上は drifile object の header 情報
+            // アーカイブする前のデータファイル名がなければ header は 32 bytes
+            dri.realDataPtr = LEBitConverter.From4ToInt(dri.dataRaw, 0);
+            dri.size = LEBitConverter.From4ToInt(dri.dataRaw, 4);
 
             return dri;
         }
@@ -95,9 +98,9 @@ namespace xsystem
             fileStream.Read(bytes, 0, 6);
 
             // header2 へのポインタ（単位は 2^8 bytes）
-            int ptrSize = LittleEndianBitConverter.ToInt12(bytes, 0);
+            int ptrSize = LEBitConverter.From3ToInt(bytes, 0);
             // data へのポインタ - header へのポインタ＝mapdata サイズ
-            int mapSize = LittleEndianBitConverter.ToInt12(bytes, 3) - ptrSize;
+            int mapSize = LEBitConverter.From3ToInt(bytes, 3) - ptrSize;
 
             // header2 へ seek して mapdata を読み込み
             byte[] mapBuffer = new byte[mapSize << 8];
@@ -115,7 +118,7 @@ namespace xsystem
                 int offset = i * 3 + 1;
 
                 int fileMapDisk = mapBuffer[i * 3];
-                int fileMapPtr = LittleEndianBitConverter.ToInt8(mapBuffer, offset);
+                int fileMapPtr = LEBitConverter.From2ToInt(mapBuffer, offset);
 
                 // zero-indexed values
                 mapDisk[i] = fileMapDisk - 1;
@@ -133,7 +136,7 @@ namespace xsystem
             fileStream.Read(bytes, 0, 6);
 
             // header2 へのポインタ（単位は 2^8 bytes）
-            int ptrSize = LittleEndianBitConverter.ToInt12(bytes, 0);
+            int ptrSize = LEBitConverter.From3ToInt(bytes, 0);
 
             int fileCount = (ptrSize << 8) / 3 - 1;
             byte[] buffer = new byte[ptrSize << 8];
@@ -145,8 +148,10 @@ namespace xsystem
             // ポインタの領域を確保
             this.filePtr[diskNo] = new int[fileCount];
 
+            // header1 からデータへのポインタ取得
             for (int i = 0; i < fileCount; ++i) {
-                int pos = LittleEndianBitConverter.ToInt12(buffer, i * 3 +3);
+                // はじめの 3 bytes は header2 なので skip
+                int pos = LEBitConverter.From3ToInt(buffer, i * 3 +3);
                 this.filePtr[diskNo][i] = pos << 8;
             }
 
