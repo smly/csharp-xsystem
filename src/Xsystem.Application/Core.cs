@@ -16,7 +16,13 @@ namespace xsystem
                 if (dri.HasValue) {
                     Console.WriteLine("no: " + i + ", size: " + dri.Value.size);
                     CgType t = cg.CheckCgFormat(dri.Value);
+                    CgData d = cg.LoadCg(dri.Value);
+
                     Console.WriteLine(t);
+                    Console.WriteLine("x: " + d.x);
+                    Console.WriteLine("y: " + d.y);
+                    Console.WriteLine("width: " + d.width);
+                    Console.WriteLine("height: " + d.height);
                 } else {
                     Console.WriteLine("ng");
                 }
