@@ -11,6 +11,7 @@ namespace xsystem
         DriDataMax = 65535,
         DriFileMax = 255,
     }
+
     public struct DriObject
     {
         public int size;
