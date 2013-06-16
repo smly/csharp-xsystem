@@ -1,0 +1,4 @@
+*.dll
+*.exe
+tests/TestResult.xml
+trunk/

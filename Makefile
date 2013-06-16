@@ -5,6 +5,7 @@ xsystem3.exe:
 
 clean:
 	cd src; make clean
+	cd tests; make clean
 
 test: xsystem3.exe
 	cd tests; make test

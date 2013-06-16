@@ -18,4 +18,5 @@ test: $(TARGET_TEST_CLASS)
 	$(TARGET_TEST_CLASS)
 
 clean:
+	rm -f xsystem.class.dll
 	rm -f $(TARGET_TEST_CLASS)
