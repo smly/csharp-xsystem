@@ -6,7 +6,9 @@ SOURCES_CORE = \
 
 SOURCES_CLASS = \
 	Xsystem.Class/LittleEndianBitConverter.cs \
-	Xsystem.Class/DriLoader.cs
+	Xsystem.Class/DriLoader.cs \
+	Xsystem.Class/CgLoader.cs \
+	Xsystem.Class/VspFormat.cs
 
 $(TARGET_CORE): $(TARGET_CLASS)
 	mcs $(SOURCES_CORE) \

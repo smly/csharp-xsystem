@@ -11,6 +11,7 @@ namespace xsystem
         DriDataMax = 65535,
         DriFileMax = 255,
     }
+
     public struct DriObject
     {
         public int size;
@@ -43,11 +44,12 @@ namespace xsystem
             ptr = this.mapPtr[objectNo];
             if (disk < 0 || ptr < 0) return null;
             if (filePtr[disk] == null) return null;
+
             dataPtr = this.filePtr[disk][ptr];
             dataPtr2 = this.filePtr[disk][ptr + 1];
             if (dataPtr == 0 || dataPtr2 == 0) return null;
-            int readSize = dataPtr2 - dataPtr;
 
+            int readSize = dataPtr2 - dataPtr;
             DriObject dri;
             // if not mmapped
             dri.dataRaw = new byte[readSize];
@@ -58,8 +60,10 @@ namespace xsystem
             fileStream.Read(dri.dataRaw, 0, readSize);
             fileStream.Close();
 
+            // 先頭32バイト以上は drifile object の header 情報
+            // アーカイブする前のデータファイル名がなければ header は 32 bytes
             dri.realDataPtr = LittleEndianBitConverter.ToInt16(dri.dataRaw, 0);
-            dri.size = LittleEndianBitConverter.ToInt16(dri.dataRaw, 0);
+            dri.size = LittleEndianBitConverter.ToInt16(dri.dataRaw, 4);
 
             return dri;
         }
@@ -144,7 +148,9 @@ namespace xsystem
             // ポインタの領域を確保
             this.filePtr[diskNo] = new int[fileCount];
 
+            // header1 からデータへのポインタ取得
             for (int i = 0; i < fileCount; ++i) {
+                // はじめの 3 bytes は header2 なので skip
                 int pos = LittleEndianBitConverter.ToInt12(buffer, i * 3 +3);
                 this.filePtr[diskNo][i] = pos << 8;
             }

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 
 namespace xsystem
 {
@@ -9,11 +8,18 @@ namespace xsystem
         {
             DriLoader loader = new DriLoader(args);
             loader.Initialize();
-            DriObject? dri = loader.GetDriObject(0);
-            if (dri != null) {
-                Console.WriteLine("ok");
-            } else {
-                Console.WriteLine("ng");
+
+            CgLoader cg = new CgLoader();
+
+            for (int i = 0; i < 10; ++i) {
+                DriObject? dri = loader.GetDriObject(i);
+                if (dri.HasValue) {
+                    Console.WriteLine("no: " + i + ", size: " + dri.Value.size);
+                    CgType t = cg.CheckCgFormat(dri.Value);
+                    Console.WriteLine(t);
+                } else {
+                    Console.WriteLine("ng");
+                }
             }
         }
     }
