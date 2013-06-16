@@ -62,8 +62,8 @@ namespace xsystem
 
             // 先頭32バイト以上は drifile object の header 情報
             // アーカイブする前のデータファイル名がなければ header は 32 bytes
-            dri.realDataPtr = LittleEndianBitConverter.ToInt16(dri.dataRaw, 0);
-            dri.size = LittleEndianBitConverter.ToInt16(dri.dataRaw, 4);
+            dri.realDataPtr = LEBitConverter.From4ToInt(dri.dataRaw, 0);
+            dri.size = LEBitConverter.From4ToInt(dri.dataRaw, 4);
 
             return dri;
         }
@@ -98,9 +98,9 @@ namespace xsystem
             fileStream.Read(bytes, 0, 6);
 
             // header2 へのポインタ（単位は 2^8 bytes）
-            int ptrSize = LittleEndianBitConverter.ToInt12(bytes, 0);
+            int ptrSize = LEBitConverter.From3ToInt(bytes, 0);
             // data へのポインタ - header へのポインタ＝mapdata サイズ
-            int mapSize = LittleEndianBitConverter.ToInt12(bytes, 3) - ptrSize;
+            int mapSize = LEBitConverter.From3ToInt(bytes, 3) - ptrSize;
 
             // header2 へ seek して mapdata を読み込み
             byte[] mapBuffer = new byte[mapSize << 8];
@@ -118,7 +118,7 @@ namespace xsystem
                 int offset = i * 3 + 1;
 
                 int fileMapDisk = mapBuffer[i * 3];
-                int fileMapPtr = LittleEndianBitConverter.ToInt8(mapBuffer, offset);
+                int fileMapPtr = LEBitConverter.From2ToInt(mapBuffer, offset);
 
                 // zero-indexed values
                 mapDisk[i] = fileMapDisk - 1;
@@ -136,7 +136,7 @@ namespace xsystem
             fileStream.Read(bytes, 0, 6);
 
             // header2 へのポインタ（単位は 2^8 bytes）
-            int ptrSize = LittleEndianBitConverter.ToInt12(bytes, 0);
+            int ptrSize = LEBitConverter.From3ToInt(bytes, 0);
 
             int fileCount = (ptrSize << 8) / 3 - 1;
             byte[] buffer = new byte[ptrSize << 8];
@@ -151,7 +151,7 @@ namespace xsystem
             // header1 からデータへのポインタ取得
             for (int i = 0; i < fileCount; ++i) {
                 // はじめの 3 bytes は header2 なので skip
-                int pos = LittleEndianBitConverter.ToInt12(buffer, i * 3 +3);
+                int pos = LEBitConverter.From3ToInt(buffer, i * 3 +3);
                 this.filePtr[diskNo][i] = pos << 8;
             }
 

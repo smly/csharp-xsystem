@@ -2,6 +2,20 @@ using System;
 
 namespace xsystem
 {
+    // 256色パレット
+    public class Pallet256
+    {
+        public byte[] red;
+        public byte[] green;
+        public byte[] blue;
+
+        public Pallet256()
+        {
+            this.red = new byte[256];
+            this.green = new byte[256];
+            this.blue = new byte[256];
+        }
+    }
     public enum CgType : int
     {
         UNKNOWN = 1,
@@ -12,12 +26,13 @@ namespace xsystem
         BMP24,
         QNT,
     }
-
     public struct CgData
     {
         public CgType type;
         public int x, y;
         public int width, height;
+        public Pallet256 pallet;
+        public byte[] data;
     }
 
     public class CgLoader
