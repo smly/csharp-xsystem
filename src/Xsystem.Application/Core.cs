@@ -10,27 +10,15 @@ namespace xsystem
             loader.Initialize();
 
             CgLoader cgLoader = new CgLoader();
-
-            int no = 20;
-            DriObject? dri = loader.GetDriObject(no);
-            if (dri.HasValue) {
-                CgData d = cgLoader.LoadCg(dri.Value);
-
-                Console.WriteLine("P3");
-                Console.WriteLine(d.width + " " + d.height);
-                Console.WriteLine("255");
-
-                for (int i = 0; i < d.height; ++i) {
-                    for (int j = 0; j < d.width; ++j) {
-                        if (j != 0)
-                            Console.Write(" ");
-                        int x = d.data[j + i * d.height] * 10;
-                        Console.Write(x + " " + x + " " + x);
-                    }
-                    Console.WriteLine("");
+            for (int i = 0; i < 10; ++i) {
+                DriObject? dri = loader.GetDriObject(i);
+                if (dri.HasValue) {
+                    CgData d = cgLoader.LoadCg(dri.Value);
+                    Console.Write("no: " + i + ", size: " + dri.Value.size);
+                    Console.WriteLine(", (" + d.width + ", " + d.height + ")");
+                } else {
+                    Console.WriteLine("ng");
                 }
-            } else {
-                Console.WriteLine("ng");
             }
         }
     }

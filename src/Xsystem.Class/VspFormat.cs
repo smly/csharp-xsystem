@@ -98,8 +98,7 @@ namespace xsystem
             for (int x = 0; x < w; ++x) {
                 // バッファに読み込む
                 for (int pl = 0; pl < 4; ++pl) {
-                    int y = 0;
-                    while (y < h) {
+                    for (int y = 0; y < h;) {
                         c0 = raw[offset];
                         offset++;
 
@@ -159,7 +158,7 @@ namespace xsystem
                             mask = 0xff;
                         } else if (c0 == 0x07) {
                             bc[pl][y] = raw[offset];
-                            offset += 1;
+                            offset++;
                             ++y;
                         }
                     }
@@ -207,7 +206,7 @@ namespace xsystem
                                            ((b3<<3)&0x08));
                 }
                 // buffer の入れ替え用
-                byte[] bt = new byte[480];
+                byte[] bt;
                 bt = bp[0]; bp[0] = bc[0]; bc[0] = bt;
                 bt = bp[1]; bp[1] = bc[1]; bc[1] = bt;
                 bt = bp[2]; bp[2] = bc[2]; bc[2] = bt;
