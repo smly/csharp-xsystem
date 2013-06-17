@@ -73,9 +73,146 @@ namespace xsystem
 
         public static byte[] ExtractImageData(DriObject dri, VspHeader header)
         {
+            int vspDataOffset = header.dataPtr;
+            int offset = dri.realDataPtr + vspDataOffset;
             // +10 Margin for broken CG
             int picSize = (header.width * 8 + 10) * (header.height + 10);
+
+            int w = header.width;
+            int h = header.height;
+
+            // raw の +offset から VSP 画像データを展開し data へコピー
+            byte[] raw = dri.dataRaw;
             byte[] data = new byte[picSize];
+
+            // extraction buffer (現在のプレーンと前のプレーン)
+            byte[][] bc = new byte[4][];
+            byte[][] bp = new byte[4][];
+            for (int j = 0; j < 4; ++j) bc[j] = new byte[480];
+            for (int j = 0; j < 4; ++j) bp[j] = new byte[480];
+
+            // 圧縮コード, mask, copy length
+            int c0, l;
+            byte mask = 0x00;
+
+            for (int x = 0; x < w; ++x) {
+                // バッファに読み込む
+                for (int pl = 0; pl < 4; ++pl) {
+                    int y = 0;
+                    while (y < h) {
+                        c0 = raw[offset];
+                        offset++;
+
+                        if (c0 >= 0x08) {
+                            bc[pl][y] = (byte)c0;
+                            ++y;
+                        } else if (c0 == 0x00) {
+                            l = (int)raw[offset] + 1;
+                            offset++;
+                            for (int i = 0; i < l; ++i)
+                                bc[pl][y + i] = bp[pl][y + i];
+                            y += l;
+                        } else if (c0 == 0x01) {
+                            l = (int)raw[offset] + 1;
+                            offset++;
+                            byte b0 = raw[offset];
+                            offset++;
+                            for (int i = 0; i < l; ++i)
+                                bc[pl][y + i] = b0;
+                            y += l;
+                        } else if (c0 == 0x02) {
+                            l = (int)raw[offset] + 1;
+                            offset++;
+                            byte b0 = raw[offset];
+                            offset++;
+                            byte b1 = raw[offset];
+                            offset++;
+                            for (int i = 0; i < l; ++i) {
+                                bc[pl][y] = b0; ++y;
+                                bc[pl][y] = b1; ++y;
+                            }
+                        } else if (c0 == 0x03) {
+                            l = (int)raw[offset] + 1;
+                            offset++;
+                            for (int i = 0; i < l; ++i) {
+                                bc[pl][y] = (byte)(bc[0][y] ^ mask);
+                                ++y;
+                            }
+                            mask = 0x00;
+                        } else if (c0 == 0x04) {
+                            l = (int)raw[offset] + 1;
+                            offset++;
+                            for (int i = 0; i < l; ++i) {
+                                bc[pl][y] = (byte)(bc[1][y] ^ mask);
+                                ++y;
+                            }
+                            mask = 0x00;
+                        } else if (c0 == 0x05) {
+                            l = (int)raw[offset] + 1;
+                            offset++;
+                            for (int i = 0; i < l; ++i) {
+                                bc[pl][y] = (byte)(bc[2][y] ^ mask);
+                                ++y;
+                            }
+                            mask = 0x00;
+                        } else if (c0 == 0x06) {
+                            mask = 0xff;
+                        } else if (c0 == 0x07) {
+                            bc[pl][y] = raw[offset];
+                            offset += 1;
+                            ++y;
+                        }
+                    }
+                }
+
+                // place から packed 展開
+                for (int y = 0; y < h; ++y) {
+                    int loc = (y * w + x) * 8;
+                    byte b0 = bc[0][y];
+                    byte b1 = bc[1][y];
+                    byte b2 = bc[2][y];
+                    byte b3 = bc[3][y];
+
+                    data[loc + 0] = (byte)(((b0>>7)&0x01) |
+                                           ((b1>>6)&0x02) |
+                                           ((b2>>5)&0x04) |
+                                           ((b3>>4)&0x08));
+                    data[loc + 1] = (byte)(((b0>>6)&0x01) |
+                                           ((b1>>5)&0x02) |
+                                           ((b2>>4)&0x04) |
+                                           ((b3>>3)&0x08));
+                    data[loc + 2] = (byte)(((b0>>5)&0x01) |
+                                           ((b1>>4)&0x02) |
+                                           ((b2>>3)&0x04) |
+                                           ((b3>>2)&0x08));
+                    data[loc + 3] = (byte)(((b0>>4)&0x01) |
+                                           ((b1>>3)&0x02) |
+                                           ((b2>>2)&0x04) |
+                                           ((b3>>1)&0x08));
+                    data[loc + 4] = (byte)(((b0>>3)&0x01) |
+                                           ((b1>>2)&0x02) |
+                                           ((b2>>1)&0x04) |
+                                           ((b3   )&0x08));
+                    data[loc + 5] = (byte)(((b0>>2)&0x01) |
+                                           ((b1>>1)&0x02) |
+                                           ((b2   )&0x04) |
+                                           ((b3<<1)&0x08));
+                    data[loc + 6] = (byte)(((b0>>1)&0x01) |
+                                           ((b1   )&0x02) |
+                                           ((b2<<1)&0x04) |
+                                           ((b3<<2)&0x08));
+                    data[loc + 7] = (byte)(((b0   )&0x01) |
+                                           ((b1<<1)&0x02) |
+                                           ((b2<<2)&0x04) |
+                                           ((b3<<3)&0x08));
+                }
+                // buffer の入れ替え用
+                byte[] bt = new byte[480];
+                bt = bp[0]; bp[0] = bc[0]; bc[0] = bt;
+                bt = bp[1]; bp[1] = bc[1]; bc[1] = bt;
+                bt = bp[2]; bp[2] = bc[2]; bc[2] = bt;
+                bt = bp[3]; bp[3] = bc[3]; bc[3] = bt;
+            }
 
             return data;
         }

@@ -2,3 +2,5 @@
 *.exe
 tests/TestResult.xml
 trunk/
+*~
+*.png
