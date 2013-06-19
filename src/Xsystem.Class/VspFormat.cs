@@ -229,6 +229,7 @@ namespace xsystem
             cg.y = header.y0;
             cg.width = header.width * 8;
             cg.height = header.height;
+            cg.palletBank = header.palletBank;
 
             return cg;
         }

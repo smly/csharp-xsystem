@@ -33,6 +33,7 @@ namespace xsystem
         public int width, height;
         public Pallet256 pallet;
         public byte[] data;
+        public int palletBank;
     }
 
     public class CgLoader
