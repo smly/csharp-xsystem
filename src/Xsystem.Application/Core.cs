@@ -1,8 +1,9 @@
 using System;
 using System.IO;
 using System.Text;
+using XSystem.Class;
 
-namespace xsystem
+namespace XSystem.Application
 {
     class PPMWriter
     {

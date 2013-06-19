@@ -4,7 +4,7 @@ using System.Collections.Generic;
 // MemoryMappedFile
 //using System.IO.MemoryMappedFiles;
 
-namespace xsystem
+namespace XSystem.Class
 {
     public enum DriSpec : int
     {

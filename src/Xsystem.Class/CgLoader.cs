@@ -1,6 +1,6 @@
 using System;
 
-namespace xsystem
+namespace XSystem.Class
 {
     // 256色パレット
     public class Pallet256

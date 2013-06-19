@@ -1,6 +1,6 @@
 using System;
 
-namespace xsystem
+namespace XSystem.Class
 {
     public struct VspHeader
     {

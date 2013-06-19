@@ -1,6 +1,6 @@
 using System;
 
-namespace xsystem
+namespace XSystem.Class
 {
     // LittleEndian 用の BitConverter
     public class LEBitConverter
