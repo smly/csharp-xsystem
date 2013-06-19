@@ -71,7 +71,7 @@ namespace XSystem.Application
         {
             string outputFilePath = "output.ppm";
             string[] filePaths = args;
-            int objectId = 4;
+            int objectId = 6;
 
             DriLoader graphicsDriLoader = new DriLoader(filePaths);
             graphicsDriLoader.Initialize();
